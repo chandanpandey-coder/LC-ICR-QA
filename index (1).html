@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>ICR Feedback Form</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+
+<style>
+body{font-family:Inter,sans-serif;background:#eef4fa;padding:40px}
+.container{max-width:1200px;margin:auto;background:#fff;border-radius:18px;padding:56px}
+.section{margin-top:56px}
+label{display:block;margin-top:28px;font-weight:600}
+select,input,textarea{
+  width:100%;margin-top:10px;padding:14px;
+  border-radius:10px;border:1px solid #cbd5e1
+}
+textarea{min-height:120px;resize:vertical}
+.hidden{display:none}
+button{
+  margin-top:60px;padding:10px 26px;
+  border:none;border-radius:10px;
+  background:#3b82f6;color:#fff;
+  cursor:pointer
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+<h1>ICR – Feedback Form</h1>
+
+<form id="icrForm" novalidate>
+
+<!-- BASIC -->
+<div class="section">
+<label>Loan Number *</label>
+<input name="LoanNumber" required>
+
+<label>Reviewer Name *</label>
+<input name="ReviewerName" required>
+</div>
+
+<!-- LOAN TYPE -->
+<div class="section">
+<label>Loan Type *</label>
+<select name="LoanType" onchange="toggleLoan(this.value)" required>
+<option value="">- Select -</option>
+<option value="Refi">Refi</option>
+<option value="Purchase">Purchase</option>
+</select>
+</div>
+
+<!-- ========================== REFI ========================== -->
+<div id="refiSection" class="hidden">
+
+<div class="section">
+<label>Are Entity documents received (except OA/Bylaws)? *</label>
+<select name="Refi_EntityDocs" onchange="entityDocs(this,'refi')" required>
+<option value="">- Select -</option>
+<option>Yes</option><option>No</option>
+</select>
+</div>
+
+<div id="refiEntityCorrect" class="section hidden">
+<label>Is Entity Data entered correctly? *</label>
+<select name="Refi_EntityCorrect" onchange="entityCorrect(this,'refi')">
+<option value="">- Select -</option>
+<option>Yes</option><option>No</option>
+</select>
+</div>
+
+<div id="refiEntityDetails" class="section hidden">
+<label>EIN updated? *</label>
+<select name="Refi_EIN"><option value="">- Select -</option><option>Yes</option><option>No</option></select>
+
+<label>Formation updated? *</label>
+<select name="Refi_Formation"><option value="">- Select -</option><option>Yes</option><option>No</option></select>
+
+<label>COGS updated? *</label>
+<select name="Refi_COGS"><option value="">- Select -</option><option>Yes</option><option>No</option><option>N/A</option></select>
+
+<label>Foreign Registration updated? *</label>
+<select name="Refi_Foreign"><option value="">- Select -</option><option>Yes</option><option>No</option><option>N/A</option></select>
+</div>
+
+<div class="section">
+<label>Are OA / Bylaws received? *</label>
+<select name="Refi_OA" onchange="toggleOA(this,'refi')" required>
+<option value="">- Select -</option>
+<option>Yes</option><option>No</option>
+</select>
+
+<div id="refiOA" class="hidden">
+<label>OA highlighted correctly? *</label>
+<select name="Refi_OA_Highlighted"><option value="">- Select -</option><option>Yes</option><option>No</option></select>
+
+<label>Signature updated correctly? *</label>
+<select name="Refi_Signature"><option value="">- Select -</option><option>Yes</option><option>No</option></select>
+</div>
+</div>
+
+<div id="refiChildGate" class="section hidden">
+<label>Closing Entity Type *</label>
+<select name="Refi_Child_Type" onchange="toggleSection(this,'refiChild','Child Entity')">
+<option value="">- Select -</option>
+<option>No Child Entity</option><option>Child Entity</option>
+</select>
+
+<div id="refiChild" class="hidden">
+<label>Child Entity info updated? *</label>
+<select name="Refi_Child_Info"><option value="">- Select -</option><option>Yes</option><option>No</option></select>
+</div>
+</div>
+
+<div class="section">
+<label>Is Payoff received? *</label>
+<select name="Refi_Payoff" required>
+<option value="">- Select -</option>
+<option>Yes</option><option>No</option><option>N/A</option>
+</select>
+</div>
+
+<div class="section">
+<label>Is Appraisal received? *</label>
+<select name="Refi_Appraisal" required>
+<option value="">- Select -</option>
+<option>Yes</option><option>No</option>
+</select>
+</div>
+
+</div>
+
+<!-- ========================== PURCHASE ========================== -->
+<div id="purchaseSection" class="hidden">
+
+<div class="section">
+<label>Are Entity documents received (except OA/Bylaws)? *</label>
+<select name="Pur_EntityDocs" onchange="entityDocs(this,'purchase')" required>
+<option value="">- Select -</option>
+<option>Yes</option><option>No</option>
+</select>
+</div>
+
+<div id="purchaseEntityCorrect" class="section hidden">
+<label>Is Entity Data entered correctly? *</label>
+<select name="Pur_EntityCorrect" onchange="entityCorrect(this,'purchase')">
+<option value="">- Select -</option>
+<option>Yes</option><option>No</option>
+</select>
+</div>
+
+<div id="purchaseEntityDetails" class="section hidden">
+<label>EIN updated? *</label>
+<select name="Pur_EIN"><option value="">- Select -</option><option>Yes</option><option>No</option></select>
+
+<label>Formation updated? *</label>
+<select name="Pur_Formation"><option value="">- Select -</option><option>Yes</option><option>No</option></select>
+
+<label>COGS updated? *</label>
+<select name="Pur_COGS"><option value="">- Select -</option><option>Yes</option><option>No</option><option>N/A</option></select>
+
+<label>Foreign Registration updated? *</label>
+<select name="Pur_Foreign"><option value="">- Select -</option><option>Yes</option><option>No</option><option>N/A</option></select>
+</div>
+
+<div class="section">
+<label>Are OA / Bylaws received? *</label>
+<select name="Pur_OA" onchange="toggleOA(this,'purchase')" required>
+<option value="">- Select -</option>
+<option>Yes</option><option>No</option>
+</select>
+
+<div id="purchaseOA" class="hidden">
+<label>OA highlighted correctly? *</label>
+<select name="Pur_OA_Highlighted"><option value="">- Select -</option><option>Yes</option><option>No</option></select>
+
+<label>Signature updated correctly? *</label>
+<select name="Pur_Signature"><option value="">- Select -</option><option>Yes</option><option>No</option></select>
+</div>
+</div>
+
+<div class="section">
+<label>Is Purchase Contract received? *</label>
+<select name="Pur_Contract" required>
+<option value="">- Select -</option>
+<option>Yes</option><option>No</option>
+</select>
+</div>
+
+<div class="section">
+<label>Is Appraisal received? *</label>
+<select name="Pur_Appraisal" required>
+<option value="">- Select -</option>
+<option>Yes</option><option>No</option><option>N/A</option>
+</select>
+</div>
+
+</div>
+
+<!-- FINAL -->
+<div class="section">
+<label>Is the Follow up Done? *</label>
+<select name="Follow_Up_Done" required><option value="">- Select -</option><option>Yes</option><option>No</option></select>
+
+<label>Are the Comments Updated? *</label>
+<select name="Comments_Updated" required><option value="">- Select -</option><option>Yes</option><option>No</option></select>
+
+<label>Is the Deal Name updated? *</label>
+<select name="Deal_Name_Updated" required><option value="">- Select -</option><option>Yes</option><option>No</option></select>
+</div>
+
+<div class="section">
+<label>Comments *</label>
+<textarea name="Final_Comments" required></textarea>
+</div>
+
+<button type="submit">Submit</button>
+</form>
+</div>
+
+<script>
+function toggleLoan(v){
+  refiSection.classList.toggle("hidden",v!=="Refi");
+  purchaseSection.classList.toggle("hidden",v!=="Purchase");
+}
+
+function entityDocs(el,type){
+  document.getElementById(type+"EntityCorrect")
+    .classList.toggle("hidden",el.value!=="Yes");
+}
+
+function entityCorrect(el,type){
+  document.getElementById(type+"EntityDetails")
+    .classList.toggle("hidden",el.value!=="No");
+}
+
+function toggleOA(el,type){
+  document.getElementById(type+"OA")
+    .classList.toggle("hidden",el.value!=="Yes");
+}
+
+/* ===== REAL-TIME FINAL SCORE ONLY ===== */
+function calculateFinalScore(form){
+  const get = n => form.querySelector(`[name="${n}"]`)?.value || "";
+  let earned = 0, possible = 0;
+  const loanType = get("LoanType");
+  const p = loanType === "Purchase" ? "Pur_" : "Refi_";
+
+  if (get(p+"EntityDocs")==="Yes"){ possible+=10; earned+= get(p+"EntityCorrect")==="Yes"?10:5; }
+  if (get(p+"OA")==="Yes"){ possible+=10; earned+=5; }
+  possible+=5; earned+= get(p+"Child_Type")==="No Child Entity"?5:0;
+  if (loanType==="Refi" && get("Refi_Payoff")==="Yes"){ possible+=5; earned+=5; }
+  if (loanType==="Purchase" && get("Pur_Contract")==="Yes"){ possible+=5; earned+=5; }
+  if (get(p+"Appraisal")==="Yes"){ possible+=5; earned+=5; }
+
+  possible+=5;
+  earned+=["Follow_Up_Done","Comments_Updated","Deal_Name_Updated"]
+    .filter(x=>get(x)==="Yes").length*(5/3);
+
+  return possible ? Math.round((earned/possible)*10000)/100 : 0;
+}
+
+/* ===== SUBMIT ===== */
+document.getElementById("icrForm").addEventListener("submit",function(e){
+  e.preventDefault();
+  const fd=new FormData(this);
+  fd.append("Final_Score",calculateFinalScore(this));
+
+  fetch("https://script.google.com/macros/s/AKfycbxejxdcefJma9q7kLf58r8SjI6hH3-ffHEZevKBHpqUxGS5sYl4HVcfgMN7hPNR1Fsw/exec",
+  {method:"POST",mode:"no-cors",body:fd});
+
+  alert("Submitted successfully");
+  this.reset();
+});
+</script>
+
+</body>
+</html>
+
+
