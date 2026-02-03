@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <title>ICR Feedback Form</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+
 <style>
 body{font-family:Inter,sans-serif;background:#eef4fa;padding:40px}
 .container{max-width:1200px;margin:auto;background:#fff;border-radius:18px;padding:56px}
@@ -34,6 +35,7 @@ button{
 <div class="section">
 <label>Loan Number *</label>
 <input name="LoanNumber" required>
+
 <label>Reviewer Name *</label>
 <input name="ReviewerName" required>
 </div>
@@ -181,30 +183,21 @@ button{
 </div>
 
 <div class="section">
-  <label>Are OA / Bylaws received? *</label>
-  <select name="Pur_OA" onchange="toggleOA(this,'purchase')" required>
-    <option value="">- Select -</option>
-    <option>Yes</option>
-    <option>No</option>
-  </select>
+<label>Are OA / Bylaws received? *</label>
+<select name="Pur_OA" onchange="toggleOA(this,'purchase')" required>
+<option value="">- Select -</option>
+<option>Yes</option>
+<option>No</option>
+</select>
 
-  <div id="purchaseOA" class="hidden">
-    <label>OA highlighted correctly? *</label>
-    <select name="Pur_OA_Highlighted">
-      <option value="">- Select -</option>
-      <option>Yes</option>
-      <option>No</option>
-    </select>
+<div id="purchaseOA" class="hidden">
+<label>OA highlighted correctly? *</label>
+<select name="Pur_OA_Highlighted"><option value="">- Select -</option><option>Yes</option><option>No</option></select>
 
-    <label>Signature updated correctly? *</label>
-    <select name="Pur_Signature">
-      <option value="">- Select -</option>
-      <option>Yes</option>
-      <option>No</option>
-    </select>
-  </div>
+<label>Signature updated correctly? *</label>
+<select name="Pur_Signature"><option value="">- Select -</option><option>Yes</option><option>No</option></select>
 </div>
-
+</div>
 
 <div id="purchaseChildGate" class="section hidden">
 <label>Closing Entity Type *</label>
@@ -268,6 +261,7 @@ button{
 <textarea name="Final_Comments" required></textarea>
 </div>
 
+<!-- ✅ SCORING FIELD -->
 <input type="hidden" name="Final_Score" id="Final_Score">
 
 <button type="submit">Submit</button>
@@ -275,92 +269,106 @@ button{
 </div>
 
 <script>
-/* ===================== SCORING LOGIC ONLY ===================== */
-
-function scoreEntity(prefix){
-  const docs = document.querySelector(`[name="${prefix}_EntityDocs"]`)?.value;
-  if(docs !== "Yes") return {score:0, weight:0};
-
-  const correct = document.querySelector(`[name="${prefix}_EntityCorrect"]`)?.value;
-  if(correct === "Yes") return {score:10, weight:10};
-
-  if(correct !== "No") return {score:0, weight:0};
-
-  const fields = ["EIN","Formation","COGS","Foreign"];
-  let applicable = 0, correctCount = 0;
-
-  fields.forEach(f=>{
-    const v = document.querySelector(`[name="${prefix}_${f}"]`)?.value;
-    if(v && v !== "N/A"){
-      applicable++;
-      if(v === "Yes") correctCount++;
-    }
-  });
-
-  if(applicable === 0) return {score:0, weight:0};
-
-  return {
-    score: +(10 * correctCount / applicable).toFixed(2),
-    weight: 10
-  };
+function setRequired(section,state){
+  section.querySelectorAll("select,input,textarea").forEach(el=>el.required=state);
 }
 
-function scoreYesNo(name, points){
-  const v = document.querySelector(`[name="${name}"]`)?.value;
-  if(v === "Yes") return {score:points, weight:points};
-  if(v === "No" || v === "N/A") return {score:0, weight:0};
-  return {score:0, weight:0};
+function toggleLoan(v){
+  refiSection.classList.toggle("hidden",v!=="Refi");
+  purchaseSection.classList.toggle("hidden",v!=="Purchase");
+}
+
+function toggleSection(el,id,val){
+  const sec=document.getElementById(id);
+  const show=el.value===val;
+  sec.classList.toggle("hidden",!show);
+  setRequired(sec,show);
+}
+
+function toggleOA(el,type){
+  const show=el.value==="Yes";
+  ["OA","ChildGate"].forEach(s=>{
+    const sec=document.getElementById(type+s);
+    sec.classList.toggle("hidden",!show);
+    setRequired(sec,show);
+  });
+}
+
+function entityDocs(el,type){
+  const sec=document.getElementById(type+"EntityCorrect");
+  sec.classList.toggle("hidden",el.value!=="Yes");
+  setRequired(sec,el.value==="Yes");
+
+  const det=document.getElementById(type+"EntityDetails");
+  det.classList.add("hidden");
+  setRequired(det,false);
+}
+
+function entityCorrect(el,type){
+  const det=document.getElementById(type+"EntityDetails");
+  det.classList.toggle("hidden",el.value!=="No");
+  setRequired(det,el.value==="No");
+}
+
+/* ===================== SCORING LOGIC ===================== */
+
+function scoreEntity(prefix){
+  const docs=document.querySelector(`[name="${prefix}_EntityDocs"]`)?.value;
+  if(docs!=="Yes") return {s:0,w:0};
+
+  const correct=document.querySelector(`[name="${prefix}_EntityCorrect"]`)?.value;
+  if(correct==="Yes") return {s:10,w:10};
+  if(correct!=="No") return {s:0,w:0};
+
+  const fields=["EIN","Formation","COGS","Foreign"];
+  let a=0,c=0;
+  fields.forEach(f=>{
+    const v=document.querySelector(`[name="${prefix}_${f}"]`)?.value;
+    if(v && v!=="N/A"){a++; if(v==="Yes") c++;}
+  });
+  if(a===0) return {s:0,w:0};
+  return {s:+(10*c/a).toFixed(2),w:10};
+}
+
+function scoreYN(name,p){
+  const v=document.querySelector(`[name="${name}"]`)?.value;
+  if(v==="Yes") return {s:p,w:p};
+  if(v==="No"||v==="N/A") return {s:0,w:0};
+  return {s:0,w:0};
 }
 
 function calculateFinalScore(){
-  let totalScore = 0;
-  let totalWeight = 0;
+  let S=0,W=0;
+  const type=document.querySelector('[name="LoanType"]').value;
+  const p=type==="Refi"?"Refi":"Pur";
 
-  const loanType = document.querySelector('[name="LoanType"]').value;
-
-  const prefix = loanType === "Refi" ? "Refi" : "Pur";
-
-  const entity = scoreEntity(prefix);
-  totalScore += entity.score;
-  totalWeight += entity.weight;
+  [scoreEntity(p)].forEach(r=>{S+=r.s;W+=r.w});
 
   [
-    `${prefix}_OA`,
-    `${prefix}_Payoff`,
-    `${prefix}_Appraisal`,
-    `${prefix}_Contract`
-  ].forEach(q=>{
-    const r = scoreYesNo(q,10);
-    totalScore += r.score;
-    totalWeight += r.weight;
-  });
-
-  [
+    `${p}_OA`,
+    `${p}_Payoff`,
+    `${p}_Appraisal`,
+    `${p}_Contract`,
     "Follow_Up_Done",
     "Comments_Updated",
     "Deal_Name_Updated"
   ].forEach(q=>{
-    const r = scoreYesNo(q,10);
-    totalScore += r.score;
-    totalWeight += r.weight;
+    const r=scoreYN(q,10);
+    S+=r.s; W+=r.w;
   });
 
-  const finalScore = totalWeight === 0 ? 0 : +(totalScore / totalWeight * 100).toFixed(2);
-  document.getElementById("Final_Score").value = finalScore;
+  document.getElementById("Final_Score").value =
+    W===0 ? 0 : +(S/W*100).toFixed(2);
 }
 
-/* ===================== EXISTING SUBMIT (UNCHANGED) ===================== */
-document.getElementById("icrForm").addEventListener("submit", function(e){
+/* SUBMIT */
+document.getElementById("icrForm").addEventListener("submit",function(e){
   e.preventDefault();
   calculateFinalScore();
 
   fetch(
     "https://script.google.com/macros/s/AKfycbw70gSfTiEYZdXxeXZG6G3i63tQJDSUaex3RJh9HSLzsQrV5dJ1HCHhYmRkISbnBXo43Q/exec",
-    {
-      method: "POST",
-      mode: "no-cors",
-      body: new FormData(this)
-    }
+    {method:"POST",mode:"no-cors",body:new FormData(this)}
   );
 
   alert("Form submitted successfully");
