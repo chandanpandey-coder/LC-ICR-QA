@@ -22,6 +22,7 @@ button{
   background:#3b82f6;color:#fff;
   cursor:pointer
 }
+button:disabled{background:#94a3b8;cursor:not-allowed;}
 </style>
 </head>
 
@@ -31,7 +32,6 @@ button{
 
 <form id="icrForm" novalidate>
 
-<!-- BASIC -->
 <div class="section">
 <label>Loan Number *</label>
 <input name="LoanNumber" required>
@@ -40,7 +40,6 @@ button{
 <input name="ReviewerName" required>
 </div>
 
-<!-- LOAN TYPE -->
 <div class="section">
 <label>Loan Type *</label>
 <select name="LoanType" onchange="toggleLoan(this.value)" required>
@@ -50,28 +49,27 @@ button{
 </select>
 </div>
 
-<!-- ========================== REFI ========================== -->
 <div id="refiSection" class="hidden">
 
 <div class="section">
 <label>Are Entity documents received (except OA/Bylaws)? *</label>
-<select name="Refi_EntityDocs" onchange="entityDocs(this,'refi')" required>
+<select name="Refi_EntityDocs" onchange="entityDocs(this,'Refi')" required>
 <option value="">- Select -</option>
 <option>Yes</option>
 <option>No</option>
 </select>
 </div>
 
-<div id="refiEntityCorrect" class="section hidden">
+<div id="RefiEntityCorrect" class="section hidden">
 <label>Is Entity Data entered correctly? *</label>
-<select name="Refi_EntityCorrect" onchange="entityCorrect(this,'refi')">
+<select name="Refi_EntityCorrect" onchange="entityCorrect(this,'Refi')">
 <option value="">- Select -</option>
 <option>Yes</option>
 <option>No</option>
 </select>
 </div>
 
-<div id="refiEntityDetails" class="section hidden">
+<div id="RefiEntityDetails" class="section hidden">
 <label>EIN updated? *</label>
 <select name="Refi_EIN"><option value="">- Select -</option><option>Yes</option><option>No</option></select>
 
@@ -87,13 +85,13 @@ button{
 
 <div class="section">
 <label>Are OA / Bylaws received? *</label>
-<select name="Refi_OA" onchange="toggleOA(this,'refi')" required>
+<select name="Refi_OA" onchange="toggleOA(this,'Refi')" required>
 <option value="">- Select -</option>
 <option>Yes</option>
 <option>No</option>
 </select>
 
-<div id="refiOA" class="hidden">
+<div id="RefiOA" class="hidden">
 <label>OA highlighted correctly? *</label>
 <select name="Refi_OA_Highlighted"><option value="">- Select -</option><option>Yes</option><option>No</option></select>
 
@@ -102,15 +100,15 @@ button{
 </div>
 </div>
 
-<div id="refiChildGate" class="section hidden">
+<div id="RefiChildGate" class="section hidden">
 <label>Closing Entity Type *</label>
-<select name="Refi_Child_Type" onchange="toggleSection(this,'refiChild','Child Entity')">
+<select name="Refi_Child_Type" onchange="toggleSection(this,'RefiChild','Child Entity')">
 <option value="">- Select -</option>
 <option>No Child Entity</option>
 <option>Child Entity</option>
 </select>
 
-<div id="refiChild" class="hidden">
+<div id="RefiChild" class="hidden">
 <label>Child Entity info updated? *</label>
 <select name="Refi_Child_Info"><option value="">- Select -</option><option>Yes</option><option>No</option></select>
 </div>
@@ -118,14 +116,14 @@ button{
 
 <div class="section">
 <label>Is Payoff received? *</label>
-<select name="Refi_Payoff" onchange="toggleSection(this,'refiPayoff','Yes')" required>
+<select name="Refi_Payoff" onchange="toggleSection(this,'RefiPayoff','Yes')" required>
 <option value="">- Select -</option>
 <option>Yes</option>
 <option>No</option>
 <option>N/A</option>
 </select>
 
-<div id="refiPayoff" class="hidden">
+<div id="RefiPayoff" class="hidden">
 <label>Payoff Good Through updated? *</label>
 <select name="Refi_Payoff_GT"><option value="">- Select -</option><option>Yes</option><option>No</option></select>
 </div>
@@ -133,13 +131,13 @@ button{
 
 <div class="section">
 <label>Is Appraisal received? *</label>
-<select name="Refi_Appraisal" onchange="toggleSection(this,'refiOOR','Yes')" required>
+<select name="Refi_Appraisal" onchange="toggleSection(this,'RefiOOR','Yes')" required>
 <option value="">- Select -</option>
 <option>Yes</option>
 <option>No</option>
 </select>
 
-<div id="refiOOR" class="hidden">
+<div id="RefiOOR" class="hidden">
 <label>OOR updated correctly? *</label>
 <select name="Refi_OOR"><option value="">- Select -</option><option>Yes</option><option>No</option></select>
 </div>
@@ -147,28 +145,27 @@ button{
 
 </div>
 
-<!-- ========================== PURCHASE ========================== -->
 <div id="purchaseSection" class="hidden">
 
 <div class="section">
 <label>Are Entity documents received (except OA/Bylaws)? *</label>
-<select name="Pur_EntityDocs" onchange="entityDocs(this,'purchase')" required>
+<select name="Pur_EntityDocs" onchange="entityDocs(this,'Pur')" required>
 <option value="">- Select -</option>
 <option>Yes</option>
 <option>No</option>
 </select>
 </div>
 
-<div id="purchaseEntityCorrect" class="section hidden">
+<div id="PurEntityCorrect" class="section hidden">
 <label>Is Entity Data entered correctly? *</label>
-<select name="Pur_EntityCorrect" onchange="entityCorrect(this,'purchase')">
+<select name="Pur_EntityCorrect" onchange="entityCorrect(this,'Pur')">
 <option value="">- Select -</option>
 <option>Yes</option>
 <option>No</option>
 </select>
 </div>
 
-<div id="purchaseEntityDetails" class="section hidden">
+<div id="PurEntityDetails" class="section hidden">
 <label>EIN updated? *</label>
 <select name="Pur_EIN"><option value="">- Select -</option><option>Yes</option><option>No</option></select>
 
@@ -184,13 +181,13 @@ button{
 
 <div class="section">
 <label>Are OA / Bylaws received? *</label>
-<select name="Pur_OA" onchange="toggleOA(this,'purchase')" required>
+<select name="Pur_OA" onchange="toggleOA(this,'Pur')" required>
 <option value="">- Select -</option>
 <option>Yes</option>
 <option>No</option>
 </select>
 
-<div id="purchaseOA" class="hidden">
+<div id="PurOA" class="hidden">
 <label>OA highlighted correctly? *</label>
 <select name="Pur_OA_Highlighted"><option value="">- Select -</option><option>Yes</option><option>No</option></select>
 
@@ -199,15 +196,15 @@ button{
 </div>
 </div>
 
-<div id="purchaseChildGate" class="section hidden">
+<div id="PurChildGate" class="section hidden">
 <label>Closing Entity Type *</label>
-<select name="Pur_Child_Type" onchange="toggleSection(this,'purchaseChild','Child Entity')">
+<select name="Pur_Child_Type" onchange="toggleSection(this,'PurChild','Child Entity')">
 <option value="">- Select -</option>
 <option>No Child Entity</option>
 <option>Child Entity</option>
 </select>
 
-<div id="purchaseChild" class="hidden">
+<div id="PurChild" class="hidden">
 <label>Child Entity info updated? *</label>
 <select name="Pur_Child_Info"><option value="">- Select -</option><option>Yes</option><option>No</option></select>
 </div>
@@ -215,13 +212,13 @@ button{
 
 <div class="section">
 <label>Is Purchase Contract received? *</label>
-<select name="Pur_Contract" onchange="toggleSection(this,'purchaseACD','Yes')" required>
+<select name="Pur_Contract" onchange="toggleSection(this,'PurACD','Yes')" required>
 <option value="">- Select -</option>
 <option>Yes</option>
 <option>No</option>
 </select>
 
-<div id="purchaseACD" class="hidden">
+<div id="PurACD" class="hidden">
 <label>Is ACD updated correctly? *</label>
 <select name="Pur_ACD"><option value="">- Select -</option><option>Yes</option><option>No</option></select>
 </div>
@@ -229,14 +226,14 @@ button{
 
 <div class="section">
 <label>Is Appraisal received? *</label>
-<select name="Pur_Appraisal" onchange="toggleSection(this,'purchaseOOR','Yes')" required>
+<select name="Pur_Appraisal" onchange="toggleSection(this,'PurOOR','Yes')" required>
 <option value="">- Select -</option>
 <option>Yes</option>
 <option>No</option>
 <option>N/A</option>
 </select>
 
-<div id="purchaseOOR" class="hidden">
+<div id="PurOOR" class="hidden">
 <label>OOR updated correctly? *</label>
 <select name="Pur_OOR"><option value="">- Select -</option><option>Yes</option><option>No</option></select>
 </div>
@@ -244,7 +241,6 @@ button{
 
 </div>
 
-<!-- FINAL QUESTIONS -->
 <div class="section">
 <label>Is the Follow up Done? *</label>
 <select name="Follow_Up_Done" required><option value="">- Select -</option><option>Yes</option><option>No</option></select>
@@ -261,7 +257,6 @@ button{
 <textarea name="Final_Comments" required></textarea>
 </div>
 
-<!-- ✅ SCORING FIELD -->
 <input type="hidden" name="Final_Score" id="Final_Score">
 
 <button type="submit">Submit</button>
@@ -269,13 +264,21 @@ button{
 </div>
 
 <script>
+// --- UI UTILITIES ---
 function setRequired(section,state){
   section.querySelectorAll("select,input,textarea").forEach(el=>el.required=state);
 }
 
 function toggleLoan(v){
-  refiSection.classList.toggle("hidden",v!=="Refi");
-  purchaseSection.classList.toggle("hidden",v!=="Purchase");
+  const refi = document.getElementById("refiSection");
+  const pur = document.getElementById("purchaseSection");
+  
+  refi.classList.toggle("hidden",v!=="Refi");
+  pur.classList.toggle("hidden",v!=="Purchase");
+  
+  // Update requirements so hidden fields don't block submit
+  setRequired(refi, v==="Refi");
+  setRequired(pur, v==="Purchase");
 }
 
 function toggleSection(el,id,val){
@@ -289,8 +292,10 @@ function toggleOA(el,type){
   const show=el.value==="Yes";
   ["OA","ChildGate"].forEach(s=>{
     const sec=document.getElementById(type+s);
-    sec.classList.toggle("hidden",!show);
-    setRequired(sec,show);
+    if(sec) {
+      sec.classList.toggle("hidden",!show);
+      setRequired(sec,show);
+    }
   });
 }
 
@@ -312,22 +317,24 @@ function entityCorrect(el,type){
 
 /* ===================== SCORING LOGIC ===================== */
 
+// Original Entity Scoring Logic
 function scoreEntity(prefix){
-  const docs=document.querySelector(`[name="${prefix}_EntityDocs"]`)?.value;
-  if(docs!=="Yes") return {s:0,w:0};
+  const docsEl = document.querySelector(`[name="${prefix}_EntityDocs"]`);
+  // Safety check if element exists
+  if(!docsEl || docsEl.value!=="Yes") return {s:0,w:0};
 
-  const correct=document.querySelector(`[name="${prefix}_EntityCorrect"]`)?.value;
-  if(correct==="Yes") return {s:10,w:10};
-  if(correct!=="No") return {s:0,w:0};
+  const correctEl = document.querySelector(`[name="${prefix}_EntityCorrect"]`);
+  if(correctEl.value==="Yes") return {s:10,w:10};
+  if(correctEl.value!=="No") return {s:0,w:0};
 
   const fields=["EIN","Formation","COGS","Foreign"];
   let applicable=0, correctCount=0;
 
   fields.forEach(f=>{
-    const v=document.querySelector(`[name="${prefix}_${f}"]`)?.value;
-    if(v && v!=="N/A"){
+    const el = document.querySelector(`[name="${prefix}_${f}"]`);
+    if(el && el.value && el.value!=="N/A"){
       applicable++;
-      if(v==="Yes") correctCount++;
+      if(el.value==="Yes") correctCount++;
     }
   });
 
@@ -335,59 +342,102 @@ function scoreEntity(prefix){
   return {s:(10 * correctCount / applicable), w:10};
 }
 
+// Logic for Standard Yes/No/NA (No = N/A)
 function scoreYN(name,max){
-  const v=document.querySelector(`[name="${name}"]`)?.value;
+  const el = document.querySelector(`[name="${name}"]`);
+  if(!el) return {s:0,w:0}; // Return 0 if element missing (prevents crash)
+
+  const v=el.value;
   if(v==="Yes") return {s:max,w:max};
   if(v==="No"||v==="N/A") return {s:0,w:0};
   return {s:0,w:0};
 }
 
+// Logic for Mandatory Questions (No = 0 points Penalty)
+function scoreMandatory(name, max){
+  const el = document.querySelector(`[name="${name}"]`);
+  if(!el) return {s:0,w:0};
+
+  const v = el.value;
+  if(v === "Yes") return {s: max, w: max}; 
+  if(v === "No") return {s: 0, w: max}; // Count weight, but 0 score
+  return {s: 0, w: 0}; 
+}
+
 function calculateFinalScore(){
   let score=0, weight=0;
-  const loanType=document.querySelector('[name="LoanType"]').value;
-  const p=loanType==="Refi"?"Refi":"Pur";
+  const loanTypeEl = document.querySelector('[name="LoanType"]');
+  if(!loanTypeEl) return;
 
-  // --- EXISTING LOGIC FOR SECTIONS ---
-  const entity=scoreEntity(p);
+  const loanType = loanTypeEl.value;
+  const p = loanType==="Refi" ? "Refi" : "Pur"; // Matches HTML name prefixes
+
+  // 1. Entity Score
+  const entity = scoreEntity(p);
   score+=entity.s; weight+=entity.w;
 
-  [
-    `${p}_OA`,
-    `${p}_Payoff`,
-    `${p}_Appraisal`,
-    `${p}_Contract`
-  ].forEach(q=>{
-    // Note: This still uses scoreYN. If "No" should also be a penalty 
-    // for these, change this to scoreMandatory as well.
-    const r=scoreYN(q,10); 
+  // 2. Variable Questions based on Type
+  // We explicitly list only the fields that exist for the chosen type
+  let questions = [];
+  if(loanType === "Refi") {
+     questions = [`${p}_OA`, `${p}_Payoff`, `${p}_Appraisal`];
+  } else if(loanType === "Purchase") {
+     questions = [`${p}_OA`, `${p}_Contract`, `${p}_Appraisal`];
+  }
+
+  questions.forEach(q=>{
+    const r=scoreYN(q,10);
     score+=r.s; weight+=r.w;
   });
 
-  // --- CORRECTED LOGIC FOR FINAL 3 QUESTIONS ---
-  // Using scoreMandatory ensures "No" is calculated as 0/5 instead of N/A
+  // 3. Final Mandatory Questions (Penalty Logic)
   ["Follow_Up_Done","Comments_Updated","Deal_Name_Updated"].forEach(q=>{
     const r=scoreMandatory(q,5);
     score+=r.s; weight+=r.w;
   });
 
-  // Calculate Final
+  // 4. Calculate Final
   document.getElementById("Final_Score").value =
     weight===0 ? 0 : +(score/weight*100).toFixed(2);
 }
-/* SUBMIT */
+
+/* SUBMIT HANDLER */
 document.getElementById("icrForm").addEventListener("submit",function(e){
   e.preventDefault();
-  calculateFinalScore();
+
+  try {
+    calculateFinalScore();
+  } catch(err) {
+    console.error("Calculation Error", err);
+    alert("Error calculating score. Please check all fields.");
+    return;
+  }
+
+  const btn = this.querySelector("button");
+  const originalText = btn.innerText;
+  btn.innerText = "Submitting...";
+  btn.disabled = true;
 
   fetch(
     "https://script.google.com/macros/s/AKfycbzxVt6fckkcaV59S5MGVXI-tshqNQGehFiFf3U9_vnKpuQ_UAGDqfKf0EXEYPKQO-WU/exec",
     {method:"POST",mode:"no-cors",body:new FormData(this)}
-  );
-
-  alert("Form submitted successfully");
-  this.reset();
+  )
+  .then(()=>{
+    alert("Form submitted successfully");
+    this.reset();
+    // Reset section visibility
+    document.getElementById("refiSection").classList.add("hidden");
+    document.getElementById("purchaseSection").classList.add("hidden");
+    document.getElementById("Final_Score").value = "";
+  })
+  .catch(()=>{
+    alert("Submission failed. Please check internet connection.");
+  })
+  .finally(()=>{
+    btn.innerText = originalText;
+    btn.disabled = false;
+  });
 });
 </script>
 </body>
 </html>
-
