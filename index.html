@@ -247,13 +247,19 @@ button{
 <!-- FINAL QUESTIONS -->
 <div class="section">
 <label>Is the Follow up Done? *</label>
-<select name="Follow_Up_Done" required><option value="">- Select -</option><option>Yes</option><option>No</option></select>
+<select name="Follow_Up_Done" required>
+<option value="">- Select -</option><option>Yes</option><option>No</option>
+</select>
 
 <label>Are the Comments Updated? *</label>
-<select name="Comments_Updated" required><option value="">- Select -</option><option>Yes</option><option>No</option></select>
+<select name="Comments_Updated" required>
+<option value="">- Select -</option><option>Yes</option><option>No</option>
+</select>
 
 <label>Is the Deal Name updated? *</label>
-<select name="Deal_Name_Updated" required><option value="">- Select -</option><option>Yes</option><option>No</option></select>
+<select name="Deal_Name_Updated" required>
+<option value="">- Select -</option><option>Yes</option><option>No</option>
+</select>
 </div>
 
 <div class="section">
@@ -261,7 +267,6 @@ button{
 <textarea name="Final_Comments" required></textarea>
 </div>
 
-<!-- ✅ SCORING FIELD -->
 <input type="hidden" name="Final_Score" id="Final_Score">
 
 <button type="submit">Submit</button>
@@ -269,47 +274,6 @@ button{
 </div>
 
 <script>
-function setRequired(section,state){
-  section.querySelectorAll("select,input,textarea").forEach(el=>el.required=state);
-}
-
-function toggleLoan(v){
-  refiSection.classList.toggle("hidden",v!=="Refi");
-  purchaseSection.classList.toggle("hidden",v!=="Purchase");
-}
-
-function toggleSection(el,id,val){
-  const sec=document.getElementById(id);
-  const show=el.value===val;
-  sec.classList.toggle("hidden",!show);
-  setRequired(sec,show);
-}
-
-function toggleOA(el,type){
-  const show=el.value==="Yes";
-  ["OA","ChildGate"].forEach(s=>{
-    const sec=document.getElementById(type+s);
-    sec.classList.toggle("hidden",!show);
-    setRequired(sec,show);
-  });
-}
-
-function entityDocs(el,type){
-  const sec=document.getElementById(type+"EntityCorrect");
-  sec.classList.toggle("hidden",el.value!=="Yes");
-  setRequired(sec,el.value==="Yes");
-
-  const det=document.getElementById(type+"EntityDetails");
-  det.classList.add("hidden");
-  setRequired(det,false);
-}
-
-function entityCorrect(el,type){
-  const det=document.getElementById(type+"EntityDetails");
-  det.classList.toggle("hidden",el.value!=="No");
-  setRequired(det,el.value==="No");
-}
-
 /* ===================== SCORING LOGIC ===================== */
 
 function scoreEntity(prefix){
