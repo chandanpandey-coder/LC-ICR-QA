@@ -321,44 +321,53 @@ function scoreEntity(prefix){
   if(correct!=="No") return {s:0,w:0};
 
   const fields=["EIN","Formation","COGS","Foreign"];
-  let a=0,c=0;
+  let applicable=0, correctCount=0;
+
   fields.forEach(f=>{
     const v=document.querySelector(`[name="${prefix}_${f}"]`)?.value;
-    if(v && v!=="N/A"){a++; if(v==="Yes") c++;}
+    if(v && v!=="N/A"){
+      applicable++;
+      if(v==="Yes") correctCount++;
+    }
   });
-  if(a===0) return {s:0,w:0};
-  return {s:+(10*c/a).toFixed(2),w:10};
+
+  if(applicable===0) return {s:0,w:0};
+  return {s:(10 * correctCount / applicable), w:10};
 }
 
-function scoreYN(name,p){
+function scoreYN(name,max){
   const v=document.querySelector(`[name="${name}"]`)?.value;
-  if(v==="Yes") return {s:p,w:p};
+  if(v==="Yes") return {s:max,w:max};
   if(v==="No"||v==="N/A") return {s:0,w:0};
   return {s:0,w:0};
 }
 
 function calculateFinalScore(){
-  let S=0,W=0;
-  const type=document.querySelector('[name="LoanType"]').value;
-  const p=type==="Refi"?"Refi":"Pur";
+  let score=0, weight=0;
+  const loanType=document.querySelector('[name="LoanType"]').value;
+  const p=loanType==="Refi"?"Refi":"Pur";
 
-  [scoreEntity(p)].forEach(r=>{S+=r.s;W+=r.w});
+  const entity=scoreEntity(p);
+  score+=entity.s; weight+=entity.w;
 
   [
     `${p}_OA`,
     `${p}_Payoff`,
     `${p}_Appraisal`,
-    `${p}_Contract`,
-    "Follow_Up_Done",
-    "Comments_Updated",
-    "Deal_Name_Updated"
+    `${p}_Contract`
   ].forEach(q=>{
     const r=scoreYN(q,10);
-    S+=r.s; W+=r.w;
+    score+=r.s; weight+=r.w;
+  });
+
+  // ✅ FINAL 3 QUESTIONS – 5 points each
+  ["Follow_Up_Done","Comments_Updated","Deal_Name_Updated"].forEach(q=>{
+    const r=scoreYN(q,5);
+    score+=r.s; weight+=r.w;
   });
 
   document.getElementById("Final_Score").value =
-    W===0 ? 0 : +(S/W*100).toFixed(2);
+    weight===0 ? 0 : +(score/weight*100).toFixed(2);
 }
 
 /* SUBMIT */
