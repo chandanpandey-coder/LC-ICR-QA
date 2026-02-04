@@ -347,6 +347,7 @@ function calculateFinalScore(){
   const loanType=document.querySelector('[name="LoanType"]').value;
   const p=loanType==="Refi"?"Refi":"Pur";
 
+  // --- EXISTING LOGIC FOR SECTIONS ---
   const entity=scoreEntity(p);
   score+=entity.s; weight+=entity.w;
 
@@ -356,20 +357,23 @@ function calculateFinalScore(){
     `${p}_Appraisal`,
     `${p}_Contract`
   ].forEach(q=>{
-    const r=scoreYN(q,10);
+    // Note: This still uses scoreYN. If "No" should also be a penalty 
+    // for these, change this to scoreMandatory as well.
+    const r=scoreYN(q,10); 
     score+=r.s; weight+=r.w;
   });
 
-  // ✅ FINAL 3 QUESTIONS – 5 points each
+  // --- CORRECTED LOGIC FOR FINAL 3 QUESTIONS ---
+  // Using scoreMandatory ensures "No" is calculated as 0/5 instead of N/A
   ["Follow_Up_Done","Comments_Updated","Deal_Name_Updated"].forEach(q=>{
-    const r=scoreYN(q,5);
+    const r=scoreMandatory(q,5);
     score+=r.s; weight+=r.w;
   });
 
+  // Calculate Final
   document.getElementById("Final_Score").value =
     weight===0 ? 0 : +(score/weight*100).toFixed(2);
 }
-
 /* SUBMIT */
 document.getElementById("icrForm").addEventListener("submit",function(e){
   e.preventDefault();
@@ -386,3 +390,4 @@ document.getElementById("icrForm").addEventListener("submit",function(e){
 </script>
 </body>
 </html>
+
