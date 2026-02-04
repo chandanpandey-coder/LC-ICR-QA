@@ -230,61 +230,99 @@ button{
 </div>
 
 <script>
-function scoreYN(name){
+/* ===================== SCORING ===================== */
+
+function ynScore(name){
   const v=document.querySelector(`[name="${name}"]`)?.value;
   if(v==="Yes") return {s:5,w:5};
   if(v==="No"||v==="N/A") return {s:0,w:0};
   return {s:0,w:0};
 }
 
-function scoreEntity(p){
-  const docs=document.querySelector(`[name="${p}_EntityDocs"]`)?.value;
-  if(docs!=="Yes") return {s:0,w:0};
-
-  const correct=document.querySelector(`[name="${p}_EntityCorrect"]`)?.value;
-  if(correct==="Yes") return {s:5,w:5};
-  if(correct!=="No") return {s:0,w:0};
-
+function entityDetailScore(prefix){
   const fields=["EIN","Formation","COGS","Foreign"];
-  let a=0,c=0;
+  let yes=0,applicable=0;
+
   fields.forEach(f=>{
-    const v=document.querySelector(`[name="${p}_${f}"]`)?.value;
-    if(v && v!=="N/A"){a++; if(v==="Yes") c++;}
+    const v=document.querySelector(`[name="${prefix}_${f}"]`)?.value;
+    if(v && v!=="N/A"){
+      applicable++;
+      if(v==="Yes") yes++;
+    }
   });
-  if(a===0) return {s:0,w:0};
-  return {s:+(5*c/a).toFixed(2),w:5};
+
+  if(applicable===0) return {s:0,w:0};
+  return {s:(5*yes/applicable),w:5};
 }
 
 function calculateFinalScore(){
   let S=0,W=0;
   const type=document.querySelector('[name="LoanType"]').value;
-  const p=type==="Refi"?"Refi":"Pur";
+  const p = type==="Refi" ? "Refi" : "Pur";
 
-  [scoreEntity(p)].forEach(r=>{S+=r.s;W+=r.w});
+  /* ENTITY */
+  [ynScore(`${p}_EntityDocs`), ynScore(`${p}_EntityCorrect`), entityDetailScore(p)]
+    .forEach(r=>{S+=r.s;W+=r.w});
 
+  /* OA */
   [
     `${p}_OA`,
-    `${p}_Payoff`,
-    `${p}_Appraisal`,
-    `${p}_Contract`,
+    `${p}_OA_Highlighted`,
+    `${p}_Signature`
+  ].forEach(f=>{
+    const r=ynScore(f); S+=r.s; W+=r.w;
+  });
+
+  /* CHILD ENTITY */
+  if(document.querySelector(`[name="${p}_Child_Type"]`)?.value==="Child Entity"){
+    const r=ynScore(`${p}_Child_Info`);
+    S+=r.s; W+=r.w;
+  }
+
+  /* REFI ONLY */
+  if(p==="Refi"){
+    [
+      "Refi_Payoff",
+      "Refi_Payoff_GT",
+      "Refi_Appraisal",
+      "Refi_OOR"
+    ].forEach(f=>{
+      const r=ynScore(f); S+=r.s; W+=r.w;
+    });
+  }
+
+  /* PURCHASE ONLY */
+  if(p==="Pur"){
+    [
+      "Pur_Contract",
+      "Pur_ACD",
+      "Pur_Appraisal",
+      "Pur_OOR"
+    ].forEach(f=>{
+      const r=ynScore(f); S+=r.s; W+=r.w;
+    });
+  }
+
+  /* FINAL QUESTIONS */
+  [
     "Follow_Up_Done",
     "Comments_Updated",
     "Deal_Name_Updated"
-  ].forEach(q=>{
-    const r=scoreYN(q);
-    S+=r.s; W+=r.w;
+  ].forEach(f=>{
+    const r=ynScore(f); S+=r.s; W+=r.w;
   });
 
   document.getElementById("Final_Score").value =
     W===0 ? 0 : +(S/W*100).toFixed(2);
 }
 
+/* SUBMIT HOOK */
 document.getElementById("icrForm").addEventListener("submit",function(e){
   e.preventDefault();
   calculateFinalScore();
 
   fetch(
-    "https://https://script.google.com/macros/s/AKfycbzxVt6fckkcaV59S5MGVXI-tshqNQGehFiFf3U9_vnKpuQ_UAGDqfKf0EXEYPKQO-WU/exec",
+    "https://script.google.com/macros/s/AKfycbzxVt6fckkcaV59S5MGVXI-tshqNQGehFiFf3U9_vnKpuQ_UAGDqfKf0EXEYPKQO-WU/exec",
     {method:"POST",mode:"no-cors",body:new FormData(this)}
   );
 
@@ -294,3 +332,4 @@ document.getElementById("icrForm").addEventListener("submit",function(e){
 </script>
 </body>
 </html>
+
