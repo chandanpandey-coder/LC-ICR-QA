@@ -264,145 +264,195 @@ button:disabled{background:#94a3b8;cursor:not-allowed;}
 </div>
 
 <script>
-// --- UI UTILITIES ---
-function setRequired(section,state){
-  section.querySelectorAll("select,input,textarea").forEach(el=>el.required=state);
+/* ===================== DISPLAY & UI LOGIC ===================== */
+function setRequired(section, state) {
+  section.querySelectorAll("select,input,textarea").forEach(el => el.required = state);
 }
 
-function toggleLoan(v){
+function toggleLoan(v) {
   const refi = document.getElementById("refiSection");
   const pur = document.getElementById("purchaseSection");
   
-  refi.classList.toggle("hidden",v!=="Refi");
-  pur.classList.toggle("hidden",v!=="Purchase");
+  refi.classList.toggle("hidden", v !== "Refi");
+  pur.classList.toggle("hidden", v !== "Purchase");
   
-  // Update requirements so hidden fields don't block submit
-  setRequired(refi, v==="Refi");
-  setRequired(pur, v==="Purchase");
+  setRequired(refi, v === "Refi");
+  setRequired(pur, v === "Purchase");
 }
 
-function toggleSection(el,id,val){
-  const sec=document.getElementById(id);
-  const show=el.value===val;
-  sec.classList.toggle("hidden",!show);
-  setRequired(sec,show);
+function toggleSection(el, id, val) {
+  const sec = document.getElementById(id);
+  const show = el.value === val;
+  if(sec) {
+    sec.classList.toggle("hidden", !show);
+    setRequired(sec, show);
+  }
 }
 
-function toggleOA(el,type){
-  const show=el.value==="Yes";
-  ["OA","ChildGate"].forEach(s=>{
-    const sec=document.getElementById(type+s);
+function toggleOA(el, type) {
+  const show = el.value === "Yes";
+  // Toggle OA Sub-section and Child Gate
+  ["OA", "ChildGate"].forEach(s => {
+    const sec = document.getElementById(type + s);
     if(sec) {
-      sec.classList.toggle("hidden",!show);
-      setRequired(sec,show);
+      sec.classList.toggle("hidden", !show);
+      setRequired(sec, show);
     }
   });
 }
 
-function entityDocs(el,type){
-  const sec=document.getElementById(type+"EntityCorrect");
-  sec.classList.toggle("hidden",el.value!=="Yes");
-  setRequired(sec,el.value==="Yes");
+function entityDocs(el, type) {
+  const sec = document.getElementById(type + "EntityCorrect");
+  sec.classList.toggle("hidden", el.value !== "Yes");
+  setRequired(sec, el.value === "Yes");
 
-  const det=document.getElementById(type+"EntityDetails");
+  const det = document.getElementById(type + "EntityDetails");
   det.classList.add("hidden");
-  setRequired(det,false);
+  setRequired(det, false);
 }
 
-function entityCorrect(el,type){
-  const det=document.getElementById(type+"EntityDetails");
-  det.classList.toggle("hidden",el.value!=="No");
-  setRequired(det,el.value==="No");
+function entityCorrect(el, type) {
+  const det = document.getElementById(type + "EntityDetails");
+  det.classList.toggle("hidden", el.value !== "No");
+  setRequired(det, el.value === "No");
 }
 
 /* ===================== SCORING LOGIC ===================== */
 
-// Original Entity Scoring Logic
-function scoreEntity(prefix){
-  const docsEl = document.querySelector(`[name="${prefix}_EntityDocs"]`);
-  // Safety check if element exists
-  if(!docsEl || docsEl.value!=="Yes") return {s:0,w:0};
+// Helper to get value safely
+function getVal(name) {
+  const el = document.querySelector(`[name="${name}"]`);
+  return el ? el.value : "";
+}
 
-  const correctEl = document.querySelector(`[name="${prefix}_EntityCorrect"]`);
-  if(correctEl.value==="Yes") return {s:10,w:10};
-  if(correctEl.value!=="No") return {s:0,w:0};
+// 1. ENTITY SCORE (Unchanged Logic)
+function scoreEntity(prefix) {
+  if (getVal(`${prefix}_EntityDocs`) !== "Yes") return {s: 0, w: 0};
+  
+  const correct = getVal(`${prefix}_EntityCorrect`);
+  if (correct === "Yes") return {s: 10, w: 10};
+  if (correct !== "No") return {s: 0, w: 0};
 
-  const fields=["EIN","Formation","COGS","Foreign"];
-  let applicable=0, correctCount=0;
-
-  fields.forEach(f=>{
-    const el = document.querySelector(`[name="${prefix}_${f}"]`);
-    if(el && el.value && el.value!=="N/A"){
+  const fields = ["EIN", "Formation", "COGS", "Foreign"];
+  let applicable = 0, correctCount = 0;
+  
+  fields.forEach(f => {
+    const v = getVal(`${prefix}_${f}`);
+    if (v && v !== "N/A") {
       applicable++;
-      if(el.value==="Yes") correctCount++;
+      if (v === "Yes") correctCount++;
     }
   });
 
-  if(applicable===0) return {s:0,w:0};
-  return {s:(10 * correctCount / applicable), w:10};
+  if (applicable === 0) return {s: 0, w: 0};
+  return {s: (10 * correctCount / applicable), w: 10};
 }
 
-// Logic for Standard Yes/No/NA (No = N/A)
-function scoreYN(name,max){
-  const el = document.querySelector(`[name="${name}"]`);
-  if(!el) return {s:0,w:0}; // Return 0 if element missing (prevents crash)
-
-  const v=el.value;
-  if(v==="Yes") return {s:max,w:max};
-  if(v==="No"||v==="N/A") return {s:0,w:0};
-  return {s:0,w:0};
+// 2. PENALTY SCORING HELPER
+// Used for sub-questions (Action items)
+// Yes = Full Points, Full Weight
+// No = 0 Points, Full Weight (Deduction)
+function scorePenalty(name, maxPoints) {
+  const v = getVal(name);
+  if (v === "Yes") return {s: maxPoints, w: maxPoints};
+  if (v === "No") return {s: 0, w: maxPoints}; // Deduct score (add weight, 0 score)
+  return {s: 0, w: 0}; // N/A or Empty -> Redistribute (0 weight)
 }
 
-// Logic for Mandatory Questions (No = 0 points Penalty)
-function scoreMandatory(name, max){
-  const el = document.querySelector(`[name="${name}"]`);
-  if(!el) return {s:0,w:0};
+// 3. OA SCORING (Complex Logic)
+function scoreOA(prefix) {
+  // Gatekeeper: Is OA Received?
+  // If No -> Redistribute (Return 0,0)
+  if (getVal(`${prefix}_OA`) !== "Yes") return {s: 0, w: 0};
 
-  const v = el.value;
-  if(v === "Yes") return {s: max, w: max}; 
-  if(v === "No") return {s: 0, w: max}; // Count weight, but 0 score
-  return {s: 0, w: 0}; 
+  let s = 0, w = 0;
+
+  // 1. OA Highlighted Correctly?
+  const hl = scorePenalty(`${prefix}_OA_Highlighted`, 10);
+  s += hl.s; w += hl.w;
+
+  // 2. Signature Updated Correctly?
+  const sig = scorePenalty(`${prefix}_Signature`, 10);
+  s += sig.s; w += sig.w;
+
+  // 3. Child Entity Logic
+  const childType = getVal(`${prefix}_Child_Type`);
+  if (childType === "Child Entity") {
+    const cInfo = scorePenalty(`${prefix}_Child_Info`, 10);
+    s += cInfo.s; w += cInfo.w;
+  }
+  // If "No Child Entity", we simply do not add weight (Redistribute automatically)
+
+  return {s: s, w: w};
 }
 
-function calculateFinalScore(){
-  let score=0, weight=0;
-  const loanTypeEl = document.querySelector('[name="LoanType"]');
-  if(!loanTypeEl) return;
+// 4. PAYOFF SCORING
+function scorePayoff(prefix) {
+  if (getVal(`${prefix}_Payoff`) !== "Yes") return {s: 0, w: 0};
+  // If received, check Good Through date
+  return scorePenalty(`${prefix}_Payoff_GT`, 10);
+}
 
-  const loanType = loanTypeEl.value;
-  const p = loanType==="Refi" ? "Refi" : "Pur"; // Matches HTML name prefixes
+// 5. CONTRACT SCORING
+function scoreContract(prefix) {
+  if (getVal(`${prefix}_Contract`) !== "Yes") return {s: 0, w: 0};
+  // If received, check ACD
+  return scorePenalty(`${prefix}_ACD`, 10);
+}
 
-  // 1. Entity Score
-  const entity = scoreEntity(p);
-  score+=entity.s; weight+=entity.w;
+// 6. APPRAISAL SCORING
+function scoreAppraisal(prefix) {
+  if (getVal(`${prefix}_Appraisal`) !== "Yes") return {s: 0, w: 0};
+  // If received, check OOR
+  return scorePenalty(`${prefix}_OOR`, 10);
+}
 
-  // 2. Variable Questions based on Type
-  // We explicitly list only the fields that exist for the chosen type
-  let questions = [];
-  if(loanType === "Refi") {
-     questions = [`${p}_OA`, `${p}_Payoff`, `${p}_Appraisal`];
-  } else if(loanType === "Purchase") {
-     questions = [`${p}_OA`, `${p}_Contract`, `${p}_Appraisal`];
+// MAIN CALCULATION
+function calculateFinalScore() {
+  let score = 0, weight = 0;
+  const loanType = getVal("LoanType");
+  const p = loanType === "Refi" ? "Refi" : "Pur";
+
+  // A. Entity Section
+  const ent = scoreEntity(p);
+  score += ent.s; weight += ent.w;
+
+  // B. OA Section (Handles Highlight, Signature, Child Info)
+  const oa = scoreOA(p);
+  score += oa.s; weight += oa.w;
+
+  // C. Conditional Sections based on Loan Type
+  if (loanType === "Refi") {
+    // Payoff
+    const pay = scorePayoff(p);
+    score += pay.s; weight += pay.w;
+    // Appraisal
+    const app = scoreAppraisal(p);
+    score += app.s; weight += app.w;
+  } 
+  else if (loanType === "Purchase") {
+    // Contract
+    const con = scoreContract(p);
+    score += con.s; weight += con.w;
+    // Appraisal
+    const app = scoreAppraisal(p);
+    score += app.s; weight += app.w;
   }
 
-  questions.forEach(q=>{
-    const r=scoreYN(q,10);
-    score+=r.s; weight+=r.w;
+  // D. Final Mandatory Questions (FollowUp, Comments, DealName)
+  // Logic: No = Deduct (0/5)
+  ["Follow_Up_Done", "Comments_Updated", "Deal_Name_Updated"].forEach(q => {
+    const r = scorePenalty(q, 5);
+    score += r.s; weight += r.w;
   });
 
-  // 3. Final Mandatory Questions (Penalty Logic)
-  ["Follow_Up_Done","Comments_Updated","Deal_Name_Updated"].forEach(q=>{
-    const r=scoreMandatory(q,5);
-    score+=r.s; weight+=r.w;
-  });
-
-  // 4. Calculate Final
+  // Final Calc
   document.getElementById("Final_Score").value =
-    weight===0 ? 0 : +(score/weight*100).toFixed(2);
+    weight === 0 ? 0 : +(score / weight * 100).toFixed(2);
 }
 
 /* SUBMIT HANDLER */
-document.getElementById("icrForm").addEventListener("submit",function(e){
+document.getElementById("icrForm").addEventListener("submit", function(e) {
   e.preventDefault();
 
   try {
@@ -420,20 +470,19 @@ document.getElementById("icrForm").addEventListener("submit",function(e){
 
   fetch(
     "https://script.google.com/macros/s/AKfycbzxVt6fckkcaV59S5MGVXI-tshqNQGehFiFf3U9_vnKpuQ_UAGDqfKf0EXEYPKQO-WU/exec",
-    {method:"POST",mode:"no-cors",body:new FormData(this)}
+    {method: "POST", mode: "no-cors", body: new FormData(this)}
   )
-  .then(()=>{
+  .then(() => {
     alert("Form submitted successfully");
     this.reset();
-    // Reset section visibility
     document.getElementById("refiSection").classList.add("hidden");
     document.getElementById("purchaseSection").classList.add("hidden");
     document.getElementById("Final_Score").value = "";
   })
-  .catch(()=>{
+  .catch(() => {
     alert("Submission failed. Please check internet connection.");
   })
-  .finally(()=>{
+  .finally(() => {
     btn.innerText = originalText;
     btn.disabled = false;
   });
